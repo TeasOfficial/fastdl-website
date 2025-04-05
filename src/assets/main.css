@@ -6,3 +6,26 @@
   padding: 2rem;
   font-weight: normal;
 }
+
+html {
+  transition: filter 0.3s ease-in-out;
+}
+html.dark {
+  background: #f0f0f0;
+  filter: invert(1) hue-rotate(180deg);
+}
+html.dark img,
+html.dark video {
+  filter: invert(1) hue-rotate(180deg); /* 二次反转恢复原色 */
+}
+
+html.dark .watermark{
+  filter: invert(1) hue-rotate(180deg);
+  color: #2d2d2d;
+}
+
+html.dark .m-card-body,
+html.dark .m-card-head,
+html.dark .m-scrollbar{
+  background-color: #eaeaea !important;
+}
