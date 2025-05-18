@@ -1,7 +1,6 @@
 <script>
 import { ref } from 'vue'
 import axios from 'axios';
-import { downloadFile } from 'vue-amazing-ui';
 export default {
     data() {
         return {
@@ -22,30 +21,44 @@ export default {
                     width: 10,
                     key: 'action'
                 }
-            ]
+            ],
+            options: [
+                {
+                    label: "fastdl.me 官方",
+                    value: "main.fastdl.me"
+                },
+                {
+                    label: "ipairsdo.xin 镜像源",
+                    value: "d.ipairsdo.xin"
+                }
+            ],
+            radiovalue: ref("main.fastdl.me")
         }
     },
     mounted() {
-        this.spinning = true
-        axios.get(document.location.protocol + "//d.ipairsdo.xin/maps_index.html.txt").then(
-            (res) => {
-                this.spinning = false
-                res.data.split("\n").forEach(v => {
-                    this.maplist.push({
-                        name: v
-                    })
-                });
-                this.mapNum = this.maplist.length
-            }
-        ).catch(
-            (err) => {
-                this.spinning = false
-                this.maplist = []
-            }
-        )
+        this.onChangeNode();
     },
     methods: {
-        onChange(page) {
+        onChangeNode() {
+            this.maplist = []
+            this.mapNum = 0
+            this.spinning = true
+            axios.get(document.location.protocol + "//d.ipairsdo.xin/maps_index.html.txt").then(
+                (res) => {
+                    this.spinning = false
+                    res.data.split("\n").forEach(v => {
+                        this.maplist.push({
+                            name: v
+                        })
+                    });
+                    this.mapNum = this.maplist.length
+                }
+            ).catch(
+                (err) => {
+                    this.spinning = false
+                    this.maplist = []
+                }
+            )
         },
         onSearch(value) {
             this.spinning = true
@@ -78,15 +91,14 @@ export default {
             })
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
-            iframe.src = 'https://main.fastdl.me/maps/' + mapname + '.bsp.bz2';
+            iframe.src = 'https://' + this.radiovalue + '/maps/' + mapname + '.bsp.bz2';
             iframe.onload = () => {
                 window['$notification'].success({
-                title: '下载就绪！',
-                description: "您的下载已经开始！"
-            })
+                    title: '下载就绪！',
+                    description: "您的下载已经开始！"
+                })
             }
             document.body.appendChild(iframe);
-            
         }
     }
 }
@@ -94,11 +106,11 @@ export default {
 
 <template>
     <Alert message="警告!!!" description="因数据较多，本页面可能会导致性能问题！" type="warning" show-icon closable close-text="我已知晓" />
+    <br>
+    <center>
+        <Radio :options="options" v-model:value="radiovalue" button />
+    </center>
     <Divider :border-width="3" border-color="orange">
-        <!-- <GradientText type="warning" :size="16" :weight="700">
-            已装载
-             张地图
-        </GradientText> -->
         <Statistic title="已装载地图数">
             <NumberAnimation :from="0" :to="mapNum" separator="" :duration="1500" />
         </Statistic>
@@ -109,7 +121,7 @@ export default {
         <br><br>
         <Table :columns="columns" :dataSource="maplist" :show-size-changer="false" show-quick-jumper>
             <template #bodyCell="{ column, record }">
-                <template v-if="column.key === 'action'">
+                <template v-if="column.key === 'action'" style="display: flex;">
                     <Button type="primary" shape="round" @click="download(record.name)">
                         下载
                     </Button>
